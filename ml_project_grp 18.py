@@ -18,31 +18,22 @@ class GaussianProcess:
         return K
  
        
-    def Neglikelihood(self, theta):
-        theta = 10**theta    # Correlation length
-        n = self.X.shape[0]  # Number of training instances
-        one = np.ones((n,1))      # Vector of ones
+    def Neglikelihood(self, theta): 
+        theta = 10**theta    
+        n = self.X.shape[0]  
+        one = np.ones((n,1))      
         
-        # Construct correlation matrix
         K = self.Corr(self.X, self.X, theta) + np.eye(n)*1e-10
-        L = np.linalg.cholesky(K)
-        #inv_K = np.linalg.inv(K)   # Inverse of correlation matrix
+        inv_K = np.linalg.inv(K)   # Inverse of correlation matrix
+
+        mu = (one.T @ inv_K @ self.y)/ (one.T @ inv_K @ one)
+
+        SigmaSqr = (self.y-mu*one).T @ inv_K @ (self.y-mu*one) / n
         
-        # Mean estimation
-        mu = (one.T @ (cho_solve((L, True), self.y))) / \
-            (one.T @ (cho_solve((L, True), one)))
-        # mu = (one.T @ inv_K @ self.y)/ (one.T @ inv_K @ one)
-        
-        # Variance estimation
-        SigmaSqr = (self.y-mu*one).T @ (cho_solve((L, True), self.y-mu*one)) / n
-        # SigmaSqr = (self.y-mu*one).T @ inv_K @ (self.y-mu*one) / n
-        
-        # Compute log-likelihood
-        LnDetK = 2*np.sum(np.log(np.abs(np.diag(L))))
-        # DetK = np.linalg.det(K)
+
+        DetK = np.linalg.det(K)
         LnLike = -(n/2)*np.log(SigmaSqr) - 0.5*LnDetK
         
-        # Update attributes
         self.K, self.L, self.mu, self.SigmaSqr = K, L, mu, SigmaSqr
         
         return -LnLike.flatten()
@@ -52,16 +43,12 @@ class GaussianProcess:
         self.X, self.y = X, y
         lb, ub = -3, 2
         
-        # Generate random starting points (Latin Hypercube)
         lhd = lhs(self.X.shape[1], samples=self.n_restarts)
-        
-        # Scale random samples to the given bounds 
+
         initial_points = (ub-lb)*lhd + lb
         
-        # Create A Bounds instance for optimization
         bnds = Bounds(lb*np.ones(X.shape[1]),ub*np.ones(X.shape[1]))
         
-        # Run local optimizer on all points
         opt_para = np.zeros((self.n_restarts, self.X.shape[1]))
         opt_func = np.zeros((self.n_restarts, 1))
         for i in range(self.n_restarts):
@@ -70,10 +57,8 @@ class GaussianProcess:
             opt_para[i,:] = res.x
             opt_func[i,:] = res.fun
         
-        # Locate the optimum results
         self.theta = opt_para[np.argmin(opt_func)]
         
-        # Update attributes
         self.NegLnlike = self.Neglikelihood(self.theta)
         
     
@@ -85,12 +70,10 @@ class GaussianProcess:
         k = self.Corr(self.X, X_test, 10**self.theta)
         
         # Mean prediction
-        f = self.mu + k.T @ (cho_solve((self.L, True), self.y-self.mu*one))
-        # f = self.mu + k.T @ self.inv_K @ (self.y-self.mu*one)
+        f = self.mu + k.T @ self.inv_K @ (self.y-self.mu*one)
         
         # Variance prediction
-        SSqr = self.SigmaSqr*(1 - np.diag(k.T @ (cho_solve((self.L, True), k))))
-        # SSqr = self.SigmaSqr*(1 - np.diag(k.T @ self.inv_K @ k))
+        SSqr = self.SigmaSqr*(1 - np.diag(k.T @ self.inv_K @ k))
         
         return f.flatten(), SSqr.flatten()
 
