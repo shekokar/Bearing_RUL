@@ -162,7 +162,7 @@ t1 = [i/X_train_1.shape[0] for i in range(1,X_train_1.shape[0]+1)]#Target fn for
 t2 = [i/X_train_2.shape[0] for i in range(1,X_train_2.shape[0]+1)]#Target fn for condition 2
 t3 = [i/X_train_3.shape[0] for i in range(1,X_train_3.shape[0]+1)]#Target fn for condition 3
 
-print('Preprocessing data for Bearing1_3')
+'''print('Preprocessing data for Bearing1_3')
 X_test_13 = feature_extract('Bearing1_3',1802) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
 print('Preprocessing data for Bearing1_4')
 X_test_14 = feature_extract('Bearing1_4',188) #188 is acc_xxxxx ie xxxxx of last csv file for Bearing1_4
@@ -183,12 +183,38 @@ X_test_26 = feature_extract('Bearing2_6',572) #572 is acc_xxxxx ie xxxxx of last
 print('Preprocessing data for Bearing2_7')
 X_test_27 = feature_extract('Bearing2_7',28) #28 is acc_xxxxx ie xxxxx of last csv file for Bearing2_7
 print('Preprocessing data for Bearing3_3')
-X_test_33 = feature_extract('Bearing3_3',58) #58 is acc_xxxxx ie xxxxx of last csv file for Bearing3_3
+X_test_33 = feature_extract('Bearing3_3',58) #58 is acc_xxxxx ie xxxxx of last csv file for Bearing3_3'''
 
+#loading feature extracted data
+print('Preprocessing data for Bearing1_3')
+X_test_13 = pd.read_csv('bearing1_3.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing1_4')
+X_test_14 = pd.read_csv('bearing1_4.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing1_5')
+X_test_15 = pd.read_csv('bearing1_5.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing1_6')
+X_test_16 = pd.read_csv('bearing1_6.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing1_7')
+X_test_17 = pd.read_csv('bearing1_7.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing2_3')
+X_test_23 = pd.read_csv('bearing2_3.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing2_4')
+X_test_24 = pd.read_csv('bearing2_4.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing2_5')
+X_test_25 = pd.read_csv('bearing2_5.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing2_6')
+X_test_26 = pd.read_csv('bearing2_6.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing2_7')
+X_test_27 = pd.read_csv('bearing2_7.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
+print('Preprocessing data for Bearing3_3')
+X_test_33 = pd.read_csv('bearing3_3.csv',header=None) #1802 is acc_xxxxx ie xxxxx of last csv file for Bearing1_3
 
 from sklearn.gaussian_process import GaussianProcessRegressor
+print("Training Model_1:\n")
 model_1 = GaussianProcessRegressor().fit(X_train_1, t1)#GP model for condition 1
+print("Training Model_2:\n")
 model_2 = GaussianProcessRegressor().fit(X_train_2, t2)#GP model for condition 2
+print("Training Model_3:\n")
 model_3 = GaussianProcessRegressor().fit(X_train_3, t3)#GP model for condition 3
 
 output13 = 1-model_1.predict(X_test_13) #change model according to condition
