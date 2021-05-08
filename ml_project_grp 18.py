@@ -5,11 +5,7 @@ import matplotlib.pyplot as plt
 
 
 class GaussianProcess:
-    def __init__(self, n_restarts, optimizer):
-        self.n_restarts = n_restarts
-        self.optimizer = optimizer
-        
-       
+     
     def Corr(self, X1, X2, theta):
         K = np.zeros((X1.shape[0], X2.shape[0]))
         for i in range(X1.shape[0]):
@@ -18,8 +14,7 @@ class GaussianProcess:
         return K
  
        
-    def Neglikelihood(self, theta): 
-        theta = 10**theta    
+    def Neglikelihood(self, theta):    
         n = self.X.shape[0]  
         one = np.ones((n,1))      
         
@@ -37,46 +32,6 @@ class GaussianProcess:
         self.K, self.L, self.mu, self.SigmaSqr = K, L, mu, SigmaSqr
         
         return -LnLike.flatten()
-        
-        
-    def fit(self, X, y):
-        self.X, self.y = X, y
-        lb, ub = -3, 2
-        
-        lhd = lhs(self.X.shape[1], samples=self.n_restarts)
-
-        initial_points = (ub-lb)*lhd + lb
-        
-        bnds = Bounds(lb*np.ones(X.shape[1]),ub*np.ones(X.shape[1]))
-        
-        opt_para = np.zeros((self.n_restarts, self.X.shape[1]))
-        opt_func = np.zeros((self.n_restarts, 1))
-        for i in range(self.n_restarts):
-            res = minimize(self.Neglikelihood, initial_points[i,:], method=self.optimizer,
-                bounds=bnds)
-            opt_para[i,:] = res.x
-            opt_func[i,:] = res.fun
-        
-        self.theta = opt_para[np.argmin(opt_func)]
-        
-        self.NegLnlike = self.Neglikelihood(self.theta)
-        
-    
-    def predict(self, X_test):        
-        n = self.X.shape[0]
-        one = np.ones((n,1))
-        
-        # Construct correlation matrix between test and train data
-        k = self.Corr(self.X, X_test, 10**self.theta)
-        
-        # Mean prediction
-        f = self.mu + k.T @ self.inv_K @ (self.y-self.mu*one)
-        
-        # Variance prediction
-        SSqr = self.SigmaSqr*(1 - np.diag(k.T @ self.inv_K @ k))
-        
-        return f.flatten(), SSqr.flatten()
-
 
 
 #PREPROCESSES DATA
